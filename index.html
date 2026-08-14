@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fut AI</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0F6E56">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <p class="eyebrow">Today's session</p>
+    <h1>Pick your focus</h1>
+  </header>
+
+  <main>
+    <section class="focus-grid" id="focusGrid">
+      <button class="focus-chip" data-focus="closeControl">Close control</button>
+      <button class="focus-chip" data-focus="shooting">Shooting</button>
+      <button class="focus-chip" data-focus="passing">Passing</button>
+      <button class="focus-chip" data-focus="oneVOne">1v1s</button>
+      <button class="focus-chip" data-focus="heading">Heading</button>
+      <button class="focus-chip" data-focus="fitness">Fitness</button>
+    </section>
+
+    <section class="minutes-row">
+      <p class="label">Minutes today</p>
+      <div class="minute-pills" id="minutePills">
+        <button data-min="10">10</button>
+        <button data-min="20">20</button>
+        <button data-min="30">30</button>
+      </div>
+    </section>
+
+    <p class="error" id="error"></p>
+
+    <button class="cta" id="submit">Get today's session</button>
+
+    <section class="result-card" id="resultCard">
+      <p class="result-meta" id="resultMeta"></p>
+      <h2 id="resultTitle"></h2>
+      <p id="resultDesc"></p>
+      <button class="done-btn" id="doneBtn">Mark done</button>
+    </section>
+
+    <section class="streak-row" id="streakRow">
+      <div class="streak-pill">
+        <span id="streakCount">0</span>
+        <span class="streak-label">day streak</span>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

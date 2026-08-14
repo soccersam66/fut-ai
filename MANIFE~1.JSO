@@ -1,0 +1,10 @@
+{
+  "name": "Fut AI",
+  "short_name": "Fut AI",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0B0F0D",
+  "theme_color": "#0F6E56",
+  "orientation": "portrait",
+  "icons": []
+}
