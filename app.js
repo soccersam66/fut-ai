@@ -23,6 +23,9 @@ const errorEl = document.getElementById('error');
 const submitBtn = document.getElementById('submit');
 const resultCard = document.getElementById('resultCard');
 const doneBtn = document.getElementById('doneBtn');
+const historyToggle = document.getElementById('historyToggle');
+const historyPanel = document.getElementById('historyPanel');
+const historyList = document.getElementById('historyList');
 
 // --- Name gate ---
 // Every localStorage key below gets prefixed with the user's name, so if this
@@ -40,6 +43,7 @@ function showMainScreen() {
   mainScreen.style.display = 'block';
   greeting.textContent = `Hey ${getUserName()}, today's session`;
   loadStreak();
+  renderHistory();
 }
 
 function showNameScreen() {
@@ -106,6 +110,8 @@ submitBtn.addEventListener('click', () => {
   doneBtn.classList.remove('done');
   doneBtn.textContent = 'Mark done';
   resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  upsertTodaySession({ focusLabel: d.label, minutes: selectedMin, drillTitle: title });
 });
 
 doneBtn.addEventListener('click', () => {
@@ -113,6 +119,13 @@ doneBtn.addEventListener('click', () => {
   doneBtn.classList.add('done');
   doneBtn.textContent = 'Done for today';
   incrementStreakIfNewDay();
+  markTodayDone();
+});
+
+historyToggle.addEventListener('click', () => {
+  const isOpen = historyPanel.style.display === 'block';
+  historyPanel.style.display = isOpen ? 'none' : 'block';
+  historyToggle.textContent = isOpen ? 'View history' : 'Hide history';
 });
 
 // --- Streak tracking (per-user via userKey) ---
@@ -150,4 +163,67 @@ function loadStreak() {
     localStorage.setItem(userKey('streak'), '0');
   }
   document.getElementById('streakCount').textContent = streak;
+}
+
+// --- Session log (replaces the manual spreadsheet) ---
+// Sessions are stored as one object per calendar day, keyed by date, in a
+// single array under userKey('sessions'). Getting a new drill on a day that
+// already has an entry overwrites that day's entry rather than adding a
+// second row — one real session per day, matching how the concierge test
+// tracker was built.
+function getSessions() {
+  const raw = localStorage.getItem(userKey('sessions'));
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveSessions(sessions) {
+  localStorage.setItem(userKey('sessions'), JSON.stringify(sessions));
+}
+
+function upsertTodaySession({ focusLabel, minutes, drillTitle }) {
+  const today = todayKey();
+  const sessions = getSessions();
+  const existingIndex = sessions.findIndex(s => s.date === today);
+  const entry = { date: today, focusLabel, minutes, drillTitle, completed: false };
+  if (existingIndex >= 0) {
+    sessions[existingIndex] = entry;
+  } else {
+    sessions.push(entry);
+  }
+  saveSessions(sessions);
+  renderHistory();
+}
+
+function markTodayDone() {
+  const today = todayKey();
+  const sessions = getSessions();
+  const existingIndex = sessions.findIndex(s => s.date === today);
+  if (existingIndex >= 0) {
+    sessions[existingIndex].completed = true;
+    saveSessions(sessions);
+    renderHistory();
+  }
+}
+
+function renderHistory() {
+  const sessions = getSessions()
+    .slice()
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .slice(0, 14);
+
+  if (sessions.length === 0) {
+    historyList.innerHTML = '<p class="history-empty">No sessions logged yet.</p>';
+    return;
+  }
+
+  historyList.innerHTML = sessions.map(s => {
+    const shortDate = s.date.slice(5).replace('-', '/');
+    const statusClass = s.completed ? 'done' : 'missed';
+    const statusText = s.completed ? 'Done' : 'Not done';
+    return `<div class="history-row">
+      <span class="history-date">${shortDate}</span>
+      <span class="history-detail">${s.focusLabel} · ${s.drillTitle}</span>
+      <span class="history-status ${statusClass}">${statusText}</span>
+    </div>`;
+  }).join('');
 }

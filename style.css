@@ -210,9 +210,65 @@ h1 {
 
 .streak-row {
   margin-top: auto;
-  padding: 20px 0;
+  padding: 20px 0 8px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 14px;
+}
+
+.history-toggle {
+  background: transparent;
+  border: none;
+  color: var(--accent-dim);
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.history-panel {
+  display: none;
+  padding-bottom: 24px;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.history-row:last-child {
+  border-bottom: none;
+}
+
+.history-date {
+  color: var(--text-dim);
+  min-width: 44px;
+}
+
+.history-detail {
+  flex: 1;
+  padding: 0 10px;
+}
+
+.history-status {
+  font-weight: 600;
+}
+
+.history-status.done {
+  color: var(--accent);
+}
+
+.history-status.missed {
+  color: var(--danger);
+}
+
+.history-empty {
+  color: var(--text-dim);
+  font-size: 13px;
+  padding: 8px 0;
 }
 
 .streak-pill {
