@@ -10,6 +10,13 @@ const drills = {
 let selectedFocus = null;
 let selectedMin = null;
 
+const nameScreen = document.getElementById('nameScreen');
+const mainScreen = document.getElementById('mainScreen');
+const nameInput = document.getElementById('nameInput');
+const nameError = document.getElementById('nameError');
+const nameSubmit = document.getElementById('nameSubmit');
+const greeting = document.getElementById('greeting');
+
 const focusGrid = document.getElementById('focusGrid');
 const minutePills = document.getElementById('minutePills');
 const errorEl = document.getElementById('error');
@@ -17,6 +24,52 @@ const submitBtn = document.getElementById('submit');
 const resultCard = document.getElementById('resultCard');
 const doneBtn = document.getElementById('doneBtn');
 
+// --- Name gate ---
+// Every localStorage key below gets prefixed with the user's name, so if this
+// ever runs on a shared device, two people's streaks/sessions don't collide.
+function getUserName() {
+  return localStorage.getItem('futai_userName');
+}
+
+function userKey(base) {
+  return `futai_${getUserName()}_${base}`;
+}
+
+function showMainScreen() {
+  nameScreen.style.display = 'none';
+  mainScreen.style.display = 'block';
+  greeting.textContent = `Hey ${getUserName()}, today's session`;
+  loadStreak();
+}
+
+function showNameScreen() {
+  nameScreen.style.display = 'flex';
+  mainScreen.style.display = 'none';
+}
+
+nameSubmit.addEventListener('click', () => {
+  const name = nameInput.value.trim();
+  if (!name) {
+    nameError.textContent = 'Enter your name first.';
+    return;
+  }
+  nameError.textContent = '';
+  localStorage.setItem('futai_userName', name);
+  showMainScreen();
+});
+
+// Also submit on Enter key, since typing then hunting for the button is friction
+nameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') nameSubmit.click();
+});
+
+if (getUserName()) {
+  showMainScreen();
+} else {
+  showNameScreen();
+}
+
+// --- Focus / minutes / drill selection ---
 focusGrid.addEventListener('click', (e) => {
   const btn = e.target.closest('.focus-chip');
   if (!btn) return;
@@ -62,12 +115,13 @@ doneBtn.addEventListener('click', () => {
   incrementStreakIfNewDay();
 });
 
+// --- Streak tracking (per-user via userKey) ---
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
 function incrementStreakIfNewDay() {
-  const lastDone = localStorage.getItem('lastDoneDate');
+  const lastDone = localStorage.getItem(userKey('lastDoneDate'));
   const today = todayKey();
   if (lastDone === today) return;
 
@@ -75,27 +129,25 @@ function incrementStreakIfNewDay() {
   yesterday.setDate(yesterday.getDate() - 1);
   const wasYesterday = lastDone === yesterday.toISOString().slice(0, 10);
 
-  let streak = parseInt(localStorage.getItem('streak') || '0', 10);
+  let streak = parseInt(localStorage.getItem(userKey('streak')) || '0', 10);
   streak = wasYesterday ? streak + 1 : 1;
 
-  localStorage.setItem('streak', String(streak));
-  localStorage.setItem('lastDoneDate', today);
+  localStorage.setItem(userKey('streak'), String(streak));
+  localStorage.setItem(userKey('lastDoneDate'), today);
   document.getElementById('streakCount').textContent = streak;
 }
 
 function loadStreak() {
-  const lastDone = localStorage.getItem('lastDoneDate');
+  const lastDone = localStorage.getItem(userKey('lastDoneDate'));
   const today = todayKey();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const wasYesterday = lastDone === yesterday.toISOString().slice(0, 10);
-  let streak = parseInt(localStorage.getItem('streak') || '0', 10);
+  let streak = parseInt(localStorage.getItem(userKey('streak')) || '0', 10);
 
   if (lastDone && lastDone !== today && !wasYesterday) {
     streak = 0;
-    localStorage.setItem('streak', '0');
+    localStorage.setItem(userKey('streak'), '0');
   }
   document.getElementById('streakCount').textContent = streak;
 }
-
-loadStreak();

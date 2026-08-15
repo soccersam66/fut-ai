@@ -12,12 +12,21 @@
 </head>
 <body>
 <div class="app">
-  <header class="topbar">
-    <p class="eyebrow">Today's session</p>
-    <h1>Pick your focus</h1>
-  </header>
+  <section id="nameScreen" class="name-screen">
+    <p class="eyebrow">Welcome to Fut AI</p>
+    <h1>What's your name?</h1>
+    <input type="text" id="nameInput" placeholder="Enter your first name" maxlength="20">
+    <p class="error" id="nameError"></p>
+    <button class="cta" id="nameSubmit">Continue</button>
+  </section>
 
-  <main>
+  <div id="mainScreen" class="main-screen">
+    <header class="topbar">
+      <p class="eyebrow" id="greeting">Today's session</p>
+      <h1>Pick your focus</h1>
+    </header>
+
+    <main>
     <section class="focus-grid" id="focusGrid">
       <button class="focus-chip" data-focus="closeControl">Close control</button>
       <button class="focus-chip" data-focus="shooting">Shooting</button>
@@ -53,7 +62,8 @@
         <span class="streak-label">day streak</span>
       </div>
     </section>
-  </main>
+    </main>
+  </div>
 </div>
 <script src="app.js"></script>
 </body>

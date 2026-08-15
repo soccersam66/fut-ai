@@ -29,6 +29,38 @@ body {
   flex-direction: column;
 }
 
+.name-screen {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 0 4px;
+}
+
+.name-screen h1 {
+  margin-bottom: 20px;
+}
+
+.name-screen input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.name-screen input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.main-screen {
+  display: none;
+}
+
 .topbar {
   padding: 28px 0 20px;
 }
