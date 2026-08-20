@@ -2,7 +2,7 @@
 // NOTE: this URL changes every time the tunnel is restarted on the Pi (it's a free
 // "quick tunnel," not a permanent one) — when that happens, update this constant
 // and re-upload app.js to GitHub, or session syncing will silently stop working.
-const SERVER_URL = 'https://eden-menu-east-governor.trycloudflare.com';
+const SERVER_URL = 'https://indicating-induction-martial-consensus.trycloudflare.com';
 
 const drills = {
   closeControl: { label: "Close control", 10: ["Wall passes", "100 reps, one and two touch. Cushion the ball away from your feet, don't just stop it dead."], 20: ["Cone weave", "8-10 cones, 1 yard apart, both feet, 10 reps each direction. Ball stays within one step of you."], 30: ["Full circuit", "Wall passes (10) + cone weave (10) + receive-and-turn reps off a wall, back to target (10)."] },
