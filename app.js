@@ -1,3 +1,9 @@
+// Points to the Fut AI logging server running on the Pi, via Cloudflare Tunnel.
+// NOTE: this URL changes every time the tunnel is restarted on the Pi (it's a free
+// "quick tunnel," not a permanent one) — when that happens, update this constant
+// and re-upload app.js to GitHub, or session syncing will silently stop working.
+const SERVER_URL = 'https://eden-menu-east-governor.trycloudflare.com';
+
 const drills = {
   closeControl: { label: "Close control", 10: ["Wall passes", "100 reps, one and two touch. Cushion the ball away from your feet, don't just stop it dead."], 20: ["Cone weave", "8-10 cones, 1 yard apart, both feet, 10 reps each direction. Ball stays within one step of you."], 30: ["Full circuit", "Wall passes (10) + cone weave (10) + receive-and-turn reps off a wall, back to target (10)."] },
   shooting: { label: "Shooting", 10: ["Target shots", "20 shots on target from the box, alternating feet. Placement over power."], 20: ["Dribble to finish", "Approach from 20 yards at speed, one touch to set, shoot. 15 reps."], 30: ["Full circuit", "Both-feet finishing (10) + first-time finishing off a served ball (10) + finishing under fatigue (10)."] },
@@ -192,6 +198,7 @@ function upsertTodaySession({ focusLabel, minutes, drillTitle }) {
   }
   saveSessions(sessions);
   renderHistory();
+  syncSessionToServer(entry);
 }
 
 function markTodayDone() {
@@ -202,7 +209,21 @@ function markTodayDone() {
     sessions[existingIndex].completed = true;
     saveSessions(sessions);
     renderHistory();
+    syncSessionToServer(sessions[existingIndex]);
   }
+}
+
+// Sends a session to the shared Pi server, in addition to saving it locally.
+// Wrapped so a failed/unreachable server (tunnel restarted, Pi offline, no wifi)
+// never breaks the local app — it just quietly stays local-only until the next sync.
+function syncSessionToServer(entry) {
+  fetch(`${SERVER_URL}/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: getUserName(), ...entry })
+  }).catch(err => {
+    console.warn('Could not sync session to server (saved locally only):', err);
+  });
 }
 
 function renderHistory() {
