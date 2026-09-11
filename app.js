@@ -1,8 +1,10 @@
-// Points to the Fut AI logging server running on the Pi, via Cloudflare Tunnel.
-// NOTE: this URL changes every time the tunnel is restarted on the Pi (it's a free
-// "quick tunnel," not a permanent one) — when that happens, update this constant
-// and re-upload app.js to GitHub, or session syncing will silently stop working.
-const SERVER_URL = 'https://indicating-induction-martial-consensus.trycloudflare.com';
+// Fut AI now syncs to Supabase instead of the Raspberry Pi 4 (the Pi's been
+// reassigned to Sam's local AI assistant project). Fill these in from your
+// Supabase project: Settings -> API -> Project URL / anon public key.
+// The anon key is meant to be public/client-side — that's how Supabase's
+// row-level-security model works — so it's safe to paste directly here.
+const SUPABASE_URL = 'https://nfgmfrwlelmplhuaqzpp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mZ21mcndsZWxtcGxodWFxenBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwOTEzNTEsImV4cCI6MjEwNDY2NzM1MX0.2hnJPMvpSzJxMxIZ0A4DlxAE1abd2nK4KetxOyMKuZ0';
 
 const drills = {
   closeControl: { label: "Close control", 10: ["Wall passes", "100 reps, one and two touch. Cushion the ball away from your feet, don't just stop it dead."], 20: ["Cone weave", "8-10 cones, 1 yard apart, both feet, 10 reps each direction. Ball stays within one step of you."], 30: ["Full circuit", "Wall passes (10) + cone weave (10) + receive-and-turn reps off a wall, back to target (10)."] },
@@ -213,16 +215,31 @@ function markTodayDone() {
   }
 }
 
-// Sends a session to the shared Pi server, in addition to saving it locally.
-// Wrapped so a failed/unreachable server (tunnel restarted, Pi offline, no wifi)
-// never breaks the local app — it just quietly stays local-only until the next sync.
+// Sends a session to the shared Supabase table, in addition to saving it locally.
+// Wrapped so a failed/unreachable request (offline, bad key, Supabase down) never
+// breaks the local app — it just quietly stays local-only until the next sync.
+// Uses Supabase's REST API (PostgREST) directly via fetch rather than the
+// supabase-js SDK, since this app has no build step — matches "on_conflict" to
+// the (name, date) unique constraint so it upserts exactly like the Pi's SQLite did.
 function syncSessionToServer(entry) {
-  fetch(`${SERVER_URL}/sessions`, {
+  fetch(`${SUPABASE_URL}/rest/v1/sessions?on_conflict=name,date`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: getUserName(), ...entry })
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify({
+      name: getUserName(),
+      date: entry.date,
+      focus_label: entry.focusLabel,
+      minutes: entry.minutes,
+      drill_title: entry.drillTitle,
+      completed: entry.completed
+    })
   }).catch(err => {
-    console.warn('Could not sync session to server (saved locally only):', err);
+    console.warn('Could not sync session to Supabase (saved locally only):', err);
   });
 }
 
